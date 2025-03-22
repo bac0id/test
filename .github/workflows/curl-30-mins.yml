@@ -1,0 +1,12 @@
+name: Run Curl Every 30 Minutes
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  run-curl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run curl command
+        run: curl -L -s ${{ secrets.Url }}
