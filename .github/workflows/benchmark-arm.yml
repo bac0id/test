@@ -1,0 +1,55 @@
+name: Benchmark Arm
+on:
+  workflow_dispatch:
+
+jobs:
+  benchmark-suite:
+    name: Comprehensive Runner Audit
+    runs-on: ubuntu-latest-arm
+    steps:
+      - name: 📋 System Basic Info
+        run: |
+          echo "============================================"
+          echo "Hostname: $(hostname)"
+          echo "Whoami: $(whoami)"
+          echo "Sudo Access: $(sudo -n true && echo 'Yes (Passwordless)' || echo 'No')"
+          echo "Virtualization: $(systemd-detect-virt || echo 'Unknown')"
+          echo "============================================"
+          echo ">>> OS Release:"
+          cat /etc/os-release
+          echo ">>> Kernel:"
+          uname -a
+
+      - name: ⚙️ Hardware Specs
+        run: |
+          echo ">>> CPU Info:"
+          lscpu | grep -E 'Model name|Socket|Thread|Core|MHz'
+          echo ">>> Memory:"
+          free -h
+          echo ">>> Disk Space:"
+          df -hT | grep -v 'tmpfs'
+
+      - name: 🌐 Network & IP
+        run: |
+          echo ">>> Public IP Info:"
+          curl -s https://ipinfo.io
+          echo -e "\n\n>>> Download Test (100MB file from Cloudflare):"
+          curl -o /dev/null -w "Speed: %{speed_download} byte/s\nTime: %{time_total} s\n" https://speed.cloudflare.com/__down?bytes=100000000
+
+      - name: 🛠 Software Environment
+        run: |
+          echo ">>> Docker:"
+          docker --version || echo "Not Installed"
+          echo ">>> Node.js:"
+          node -v || echo "Not Installed"
+          echo ">>> Python:"
+          python3 --version || echo "Not Installed"
+          echo ">>> Git:"
+          git --version
+          echo ">>> GCC:"
+          gcc --version | head -n 1 || echo "Not Installed"
+
+      - name: 🚀 Performance Benchmark (YABS)
+        run: |
+          sudo apt-get update -y -q && sudo apt-get install -y -q curl wget
+          curl -sL yabs.sh | bash -s -- -i
